@@ -11,19 +11,18 @@ import javax.swing.JTextField;
 
 /**
  *
- * @author David
+ * @author David https://www.youtube.com/davidpachecojimenez
  */
 public class Limpiar_txt {
-    
-    public void limpiar_texto(JPanel panel){
-        for(int i = 0; panel.getComponents().length > i; i++){
-            if(panel.getComponents()[i] instanceof JTextField){
-                ((JTextField)panel.getComponents()[i]).setText("");
-            }
-            else if(panel.getComponents()[i] instanceof JPasswordField){
-                ((JPasswordField)panel.getComponents()[i]).setText("");
+
+    public void limpiar_texto(JPanel panel) {
+        for (int i = 0; panel.getComponents().length > i; i++) {
+            if (panel.getComponents()[i] instanceof JTextField) {
+                ((JTextField) panel.getComponents()[i]).setText("");
+            } else if (panel.getComponents()[i] instanceof JPasswordField) {
+                ((JPasswordField) panel.getComponents()[i]).setText("");
             }
         }
     }
-    
+
 }

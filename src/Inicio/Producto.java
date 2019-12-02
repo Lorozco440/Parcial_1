@@ -5,27 +5,27 @@
  */
 package Inicio;
 
-import java.io.Serializable;
-
 /**
  *
- * @author David
+ * @author David https://www.youtube.com/davidpachecojimenez
  */
 public class Producto {
-    
+
     private int codigo;
     private String nombre;
     private double precio;
     private Object descripcion;
 
-    public Producto(){}
-    
-    public Producto(int codigo, String nombre, double precio, Object descripcion){
+    public Producto() {
+    }
+
+    public Producto(int codigo, String nombre, double precio, Object descripcion) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.precio = precio;
         this.descripcion = descripcion;
     }
+
     /**
      * @return the codigo
      */
@@ -81,5 +81,5 @@ public class Producto {
     public void setDescripcion(Object descripcion) {
         this.descripcion = descripcion;
     }
-    
+
 }
