@@ -5,6 +5,7 @@
  */
 package Inicio;
 
+import Otros.ImagenJChooser;
 import Otros.Limpiar_txt;
 import Otros.imgTabla;
 import java.io.BufferedReader;
@@ -15,7 +16,6 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
-;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -25,10 +25,8 @@ import javax.swing.table.DefaultTableModel;
 
 /**
  *
- * @author David
+ * @author https://www.youtube.com/davidpachecojimenez
  */
-
-
 public class Visual extends javax.swing.JFrame {
 
     /**
@@ -242,6 +240,23 @@ public class Visual extends javax.swing.JFrame {
             return descripcion;
         } catch (Exception ex) {
             return null;
+        }
+    }
+
+    public void open_file() {
+        JFileChooser j = new JFileChooser();
+        //j.setCurrentDirectory(new File("ruta de archivo a recordar"));
+        FileNameExtensionFilter fil = new FileNameExtensionFilter("JPG, PNG & GIF", "jpg", "png", "gif");
+        j.setFileFilter(fil);
+        j.setCurrentDirectory(new File("Fotos"));
+        ImagenJChooser preview = new ImagenJChooser();
+        j.setAccessory(preview);
+        j.addPropertyChangeListener(preview);
+
+        int el = j.showOpenDialog(this);
+        if (el == JFileChooser.APPROVE_OPTION) {
+            txtRuta.setText(j.getSelectedFile().getAbsolutePath());
+            lblFoto.setIcon(new ImageIcon(txtRuta.getText()));
         }
     }
 
@@ -615,15 +630,8 @@ public class Visual extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        JFileChooser jf = new JFileChooser();
-        FileNameExtensionFilter fil = new FileNameExtensionFilter("JPG, PNG & GIF", "jpg", "png", "gif");
-        jf.setFileFilter(fil);
-        jf.setCurrentDirectory(new File("Fotos"));
-        int el = jf.showOpenDialog(this);
-        if (el == JFileChooser.APPROVE_OPTION) {
-            txtRuta.setText(jf.getSelectedFile().getAbsolutePath());
-            lblFoto.setIcon(new ImageIcon(txtRuta.getText()));
-        }
+
+        open_file();
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseClicked
@@ -657,7 +665,7 @@ public class Visual extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNombreActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-
+        
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void rbcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbcActionPerformed

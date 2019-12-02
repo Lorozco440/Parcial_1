@@ -82,4 +82,8 @@ public class Producto {
         this.descripcion = descripcion;
     }
 
+    public String toString() {
+        return this.nombre;
+    }
+
 }
