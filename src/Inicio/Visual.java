@@ -7,24 +7,15 @@ package Inicio;
 
 import Otros.Limpiar_txt;
 import Otros.imgTabla;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
-import javax.imageio.ImageIO;
+;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -36,220 +27,235 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author David
  */
+
+
 public class Visual extends javax.swing.JFrame {
 
     /**
      * Creates new form Visual
      */
-    
     Limpiar_txt lt = new Limpiar_txt();
-    
-    private String ruta_txt = "mi.txt"; 
-    
-    Producto p;
-    Proceso rp;
-    
+
+    private String ruta_txt = "mi.txt";
+
+    Producto producto;
+    Proceso proceso;
+
     int clic_tabla;
-            
+
     public Visual() {
         initComponents();
-        rp = new Proceso();
-        
-        try{
+        proceso = new Proceso();
+
+        try {
             cargar_txt();
             listarRegistro();
-        }catch(Exception ex){
+        } catch (Exception ex) {
             mensaje("No existe el archivo txt");
+        }
+
+        rbc.setSelected(true);
+    }
+
+    public void cargar_txt() {
+        File ruta = new File(ruta_txt);
+        try {
+
+            FileReader fi = new FileReader(ruta);
+            BufferedReader bu = new BufferedReader(fi);
+
+            String linea = null;
+            while ((linea = bu.readLine()) != null) {
+                StringTokenizer st = new StringTokenizer(linea, ",");
+                producto = new Producto();
+                producto.setCodigo(Integer.parseInt(st.nextToken()));
+                producto.setNombre(st.nextToken());
+                producto.setPrecio(Double.parseDouble(st.nextToken()));
+                producto.setDescripcion(st.nextToken());
+                proceso.agregarRegistro(producto);
+            }
+            bu.close();
+        } catch (Exception ex) {
+            mensaje("Error al cargar archivo: " + ex.getMessage());
+            System.out.println(ex.getMessage());
         }
     }
 
-    public void cargar_txt(){
-        File ruta = new File(ruta_txt);
-        try{
-            
-            FileReader fi = new FileReader(ruta);
-            BufferedReader bu = new BufferedReader(fi);
-            
-            
-            String linea = null;
-            while((linea = bu.readLine())!=null){
-                StringTokenizer st = new StringTokenizer(linea, ",");
-                p = new Producto();
-                p.setCodigo(Integer.parseInt(st.nextToken()));
-                p.setNombre(st.nextToken());
-                p.setPrecio(Double.parseDouble(st.nextToken()));
-                p.setDescripcion(st.nextToken());
-                rp.agregarRegistro(p);
-            }
-            bu.close();
-        }catch(Exception ex){
-            mensaje("Error al cargar archivo: "+ex.getMessage());
-            System.out.println(ex.getMessage());
-        }
-    }
-    
-    public void grabar_txt(){
+    public void grabar_txt() {
         FileWriter fw;
         PrintWriter pw;
-        try{
+        try {
             fw = new FileWriter(ruta_txt);
             pw = new PrintWriter(fw);
-            
-            for(int i = 0; i < rp.cantidadRegistro(); i++){
-                p = rp.obtenerRegistro(i);
-                pw.println(String.valueOf(p.getCodigo()+", "+p.getNombre()+", "+p.getPrecio()+", "+p.getDescripcion()));
+
+            for (int i = 0; i < proceso.cantidadRegistro(); i++) {
+                producto = proceso.obtenerRegistro(i);
+                pw.println(String.valueOf(producto.getCodigo() + ", " + producto.getNombre() + ", " + producto.getPrecio() + ", " + producto.getDescripcion()));
             }
-             pw.close();
-            
-        }catch(Exception ex){
-            mensaje("Error al grabar archivo: "+ex.getMessage());
+            pw.close();
+
+        } catch (Exception ex) {
+            mensaje("Error al grabar archivo: " + ex.getMessage());
             System.out.println(ex.getMessage());
         }
     }
-    
-    public void ingresarRegistro(File ruta){
-        try{
-            if(leerCodigo() == -666)mensaje("Ingresar codigo entero");
-            else if(leerNombre() == null)mensaje("Ingresar Nombre");
-            else if(leerPrecio() == -666) mensaje("Ingresar Precio");
-            else if(leerDescripcion() == null)mensaje("Ingresar Descripcion");
-            else{
-                p = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
-                if(rp.buscaCodigo(p.getCodigo())!= -1)mensaje("Este codigo ya existe");
-                else rp.agregarRegistro(p);
-                
-                grabar_txt();
-                listarRegistro();
-                lt.limpiar_texto(panel); 
-            }
-        }catch(Exception ex){
-            mensaje(ex.getMessage());
-        }
-    }
-    
-    public void modificarRegistro(File ruta){
-        try{
-            if(leerCodigo() == -666)mensaje("Ingresar codigo entero");
-            else if(leerNombre() == null)mensaje("Ingresar Nombre");
-            else if(leerPrecio() == -666) mensaje("Ingresar Precio");
-            else if(leerDescripcion() == null)mensaje("Ingresar Descripcion");
-            else{
-                int codigo = rp.buscaCodigo(leerCodigo());
-                p = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
-                
-                if(codigo == -1)rp.agregarRegistro(p);
-                else rp.modificarRegistro(codigo, p);
-                
+
+    public void ingresarRegistro(File ruta) {
+        try {
+            if (leerCodigo() == -666) {
+                mensaje("Ingresar codigo entero");
+            } else if (leerNombre() == null) {
+                mensaje("Ingresar Nombre");
+            } else if (leerPrecio() == -666) {
+                mensaje("Ingresar Precio");
+            } else if (leerDescripcion() == null) {
+                mensaje("Ingresar Descripcion");
+            } else {
+                producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
+                if (proceso.buscaCodigo(producto.getCodigo()) != -1) {
+                    mensaje("Este codigo ya existe");
+                } else {
+                    proceso.agregarRegistro(producto);
+                }
+
                 grabar_txt();
                 listarRegistro();
                 lt.limpiar_texto(panel);
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             mensaje(ex.getMessage());
         }
     }
-    
-    public void eliminarRegistro(){
-        try{
-            if(leerCodigo() == -666) mensaje("Ingrese codigo entero");
-            
-            else{
-                int codigo = rp.buscaCodigo(leerCodigo());
-                if(codigo == -1) mensaje("codigo no existe");
-                
-                else{
-                    int s = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar este producto","Si/No",0);
-                    if(s == 0){
-                        rp.eliminarRegistro(codigo);
-                        
+
+    public void modificarRegistro(File ruta) {
+        try {
+            if (leerCodigo() == -666) {
+                mensaje("Ingresar codigo entero");
+            } else if (leerNombre() == null) {
+                mensaje("Ingresar Nombre");
+            } else if (leerPrecio() == -666) {
+                mensaje("Ingresar Precio");
+            } else if (leerDescripcion() == null) {
+                mensaje("Ingresar Descripcion");
+            } else {
+                int codigo = proceso.buscaCodigo(leerCodigo());
+                producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
+
+                if (codigo == -1) {
+                    proceso.agregarRegistro(producto);
+                } else {
+                    proceso.modificarRegistro(codigo, producto);
+                }
+
+                grabar_txt();
+                listarRegistro();
+                lt.limpiar_texto(panel);
+            }
+        } catch (Exception ex) {
+            mensaje(ex.getMessage());
+        }
+    }
+
+    public void eliminarRegistro() {
+        try {
+            if (leerCodigo() == -666) {
+                mensaje("Ingrese codigo entero");
+            } else {
+                int codigo = proceso.buscaCodigo(leerCodigo());
+                if (codigo == -1) {
+                    mensaje("codigo no existe");
+                } else {
+                    int s = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar este producto", "Si/No", 0);
+                    if (s == 0) {
+                        proceso.eliminarRegistro(codigo);
+
                         grabar_txt();
                         listarRegistro();
                         lt.limpiar_texto(panel);
                     }
                 }
-                
-                
+
             }
-        }catch(Exception ex){
+        } catch (Exception ex) {
             mensaje(ex.getMessage());
         }
     }
-    
-    public void listarRegistro(){
-        DefaultTableModel dt = new DefaultTableModel(){
+
+    public void listarRegistro() {
+        DefaultTableModel dt = new DefaultTableModel() {
             @Override
-            public boolean isCellEditable(int row, int column){
+            public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
-        
+
         dt.addColumn("Codigo");
         dt.addColumn("Nombre");
         dt.addColumn("Precio");
         dt.addColumn("Descripcion");
-        
+
         tabla.setDefaultRenderer(Object.class, new imgTabla());
-        
+
         Object fila[] = new Object[dt.getColumnCount()];
-        for(int i = 0; i < rp.cantidadRegistro(); i++){
-            p = rp.obtenerRegistro(i);
-            fila[0] = p.getCodigo();
-            fila[1] = p.getNombre();
-            fila[2] = p.getPrecio();
-            fila[3] = p.getDescripcion();
+        for (int i = 0; i < proceso.cantidadRegistro(); i++) {
+            producto = proceso.obtenerRegistro(i);
+            fila[0] = producto.getCodigo();
+            fila[1] = producto.getNombre();
+            fila[2] = producto.getPrecio();
+            fila[3] = producto.getDescripcion();
             dt.addRow(fila);
         }
         tabla.setModel(dt);
         tabla.setRowHeight(60);
     }
-    
-    public int leerCodigo(){
-        try{
+
+    public int leerCodigo() {
+        try {
             int codigo = Integer.parseInt(txtCodigo.getText().trim());
             return codigo;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return -666;
         }
     }
-    
-    public String leerNombre(){
-        try{
+
+    public String leerNombre() {
+        try {
             String nombre = txtNombre.getText().trim().replace(" ", "_");
             return nombre;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
-    
-    public double leerPrecio(){
-        try{
+
+    public double leerPrecio() {
+        try {
             double precio = Double.parseDouble(txtPrecio.getText().trim());
             return precio;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return -666;
         }
     }
-    
-    public Object leerDescripcion(){
-        try{
+
+    public Object leerDescripcion() {
+        try {
             Object descripcion = txtDescripcion.getText().trim();
             return descripcion;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
-    
-    public byte[] leerFoto(File ruta){
-        try{
+
+    public byte[] leerFoto(File ruta) {
+        try {
             byte[] icono = new byte[(int) ruta.length()];
             InputStream input = new FileInputStream(ruta);
             input.read(icono);
             return icono;
-        }catch(Exception ex){
+        } catch (Exception ex) {
             return null;
         }
     }
-    
+
     /*
     public byte[] leerFoto2(int codigo){
             p = rp.obtenerRegistro(codigo);
@@ -259,16 +265,16 @@ public class Visual extends javax.swing.JFrame {
                return null;
             }
         }*/
-
-    public void mensaje(String texto){
+    public void mensaje(String texto) {
         JOptionPane.showMessageDialog(null, texto);
     }
-    
-    
+
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        grupobuscar = new javax.swing.ButtonGroup();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
         panel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         tabla = new javax.swing.JTable();
@@ -288,6 +294,14 @@ public class Visual extends javax.swing.JFrame {
         txtRuta = new javax.swing.JTextField();
         lblFoto = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        rbc = new javax.swing.JRadioButton();
+        rbn = new javax.swing.JRadioButton();
+        rbp = new javax.swing.JRadioButton();
+        txtbuscar = new javax.swing.JTextField();
+        jButton6 = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tablabuscar = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Base de Datos con Bloc de Notas .txt");
@@ -347,6 +361,11 @@ public class Visual extends javax.swing.JFrame {
         txtPrecio.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
 
         txtNombre.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+        txtNombre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNombreActionPerformed(evt);
+            }
+        });
 
         txtCodigo.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
 
@@ -421,7 +440,7 @@ public class Visual extends javax.swing.JFrame {
                         .addComponent(jButton2)
                         .addGap(18, 18, 18)
                         .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
                         .addComponent(jButton5)))
                 .addContainerGap())
         );
@@ -440,7 +459,7 @@ public class Visual extends javax.swing.JFrame {
                         .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel2)
                             .addComponent(txtNombre, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtRuta, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE))
+                            .addComponent(txtRuta))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
@@ -457,21 +476,118 @@ public class Visual extends javax.swing.JFrame {
                     .addComponent(jButton3)
                     .addComponent(jButton5))
                 .addGap(30, 30, 30)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
                 .addContainerGap())
         );
+
+        jTabbedPane1.addTab("Registro de Productos", panel);
+
+        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
+
+        grupobuscar.add(rbc);
+        rbc.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        rbc.setText("Filtrar por Codigo");
+        rbc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbcActionPerformed(evt);
+            }
+        });
+
+        grupobuscar.add(rbn);
+        rbn.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        rbn.setText("Filtrar por Nombre");
+        rbn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbnActionPerformed(evt);
+            }
+        });
+
+        grupobuscar.add(rbp);
+        rbp.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
+        rbp.setText("Filtrar por Precio");
+        rbp.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                rbpActionPerformed(evt);
+            }
+        });
+
+        txtbuscar.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
+
+        jButton6.setFont(new java.awt.Font("Arial Black", 1, 14)); // NOI18N
+        jButton6.setText("Buscar");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        tablabuscar.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane2.setViewportView(tablabuscar);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jScrollPane2))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(108, 108, 108)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(rbc)
+                                .addGap(32, 32, 32)
+                                .addComponent(rbn)
+                                .addGap(32, 32, 32)
+                                .addComponent(rbp))
+                            .addComponent(txtbuscar))
+                        .addGap(0, 33, Short.MAX_VALUE)))
+                .addContainerGap())
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(272, 272, 272)
+                .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(25, 25, 25)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(rbc)
+                    .addComponent(rbn)
+                    .addComponent(rbp))
+                .addGap(30, 30, 30)
+                .addComponent(txtbuscar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jButton6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jTabbedPane1.addTab("Buscador", jPanel1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jTabbedPane1)
         );
 
         pack();
@@ -481,53 +597,53 @@ public class Visual extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         File ruta = new File(txtRuta.getText());
         this.ingresarRegistro(ruta);
-        
-        
+
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         File ruta = new File(txtRuta.getText());
         this.modificarRegistro(ruta);
-        
-        
+
+
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         this.eliminarRegistro();
-        
-        
+
+
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         JFileChooser jf = new JFileChooser();
-        FileNameExtensionFilter fil = new FileNameExtensionFilter("JPG, PNG & GIF","jpg","png","gif");
+        FileNameExtensionFilter fil = new FileNameExtensionFilter("JPG, PNG & GIF", "jpg", "png", "gif");
         jf.setFileFilter(fil);
         jf.setCurrentDirectory(new File("Fotos"));
         int el = jf.showOpenDialog(this);
-        if(el == JFileChooser.APPROVE_OPTION){
+        if (el == JFileChooser.APPROVE_OPTION) {
             txtRuta.setText(jf.getSelectedFile().getAbsolutePath());
             lblFoto.setIcon(new ImageIcon(txtRuta.getText()));
         }
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaMouseClicked
-        
+
         clic_tabla = tabla.rowAtPoint(evt.getPoint());
-        
-        int codigo = (int)tabla.getValueAt(clic_tabla, 0);
-        String nombre = ""+tabla.getValueAt(clic_tabla, 1);
-        double precio = (double)tabla.getValueAt(clic_tabla, 2);
-        Object descripcion = ""+tabla.getValueAt(clic_tabla, 3);
+
+        int codigo = (int) tabla.getValueAt(clic_tabla, 0);
+        String nombre = "" + tabla.getValueAt(clic_tabla, 1);
+        double precio = (double) tabla.getValueAt(clic_tabla, 2);
+        Object descripcion = "" + tabla.getValueAt(clic_tabla, 3);
 
         txtCodigo.setText(String.valueOf(codigo));
         txtNombre.setText(nombre);
         txtPrecio.setText(String.valueOf(precio));
         txtDescripcion.setText(String.valueOf(descripcion));
-        
-        try{
-            JLabel lbl = (JLabel)tabla.getValueAt(clic_tabla, 4);
+
+        try {
+            JLabel lbl = (JLabel) tabla.getValueAt(clic_tabla, 4);
             lblFoto.setIcon(lbl.getIcon());
-        }catch(Exception ex){
+        } catch (Exception ex) {
         }
     }//GEN-LAST:event_tablaMouseClicked
 
@@ -535,6 +651,26 @@ public class Visual extends javax.swing.JFrame {
         Limpiar_txt lp = new Limpiar_txt();
         lp.limpiar_texto(panel);
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void txtNombreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNombreActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNombreActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void rbcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbcActionPerformed
+        txtbuscar.setText("");
+    }//GEN-LAST:event_rbcActionPerformed
+
+    private void rbnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbnActionPerformed
+        txtbuscar.setText("");
+    }//GEN-LAST:event_rbnActionPerformed
+
+    private void rbpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbpActionPerformed
+        txtbuscar.setText("");
+    }//GEN-LAST:event_rbpActionPerformed
 
     /**
      * @param args the command line arguments
@@ -572,24 +708,34 @@ public class Visual extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.ButtonGroup grupobuscar;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel lblFoto;
     private javax.swing.JPanel panel;
+    private javax.swing.JRadioButton rbc;
+    private javax.swing.JRadioButton rbn;
+    private javax.swing.JRadioButton rbp;
     private javax.swing.JTable tabla;
+    private javax.swing.JTable tablabuscar;
     private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtDescripcion;
     private javax.swing.JTextField txtNombre;
     private javax.swing.JTextField txtPrecio;
     private javax.swing.JTextField txtRuta;
+    private javax.swing.JTextField txtbuscar;
     // End of variables declaration//GEN-END:variables
 }
