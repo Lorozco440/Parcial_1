@@ -9,10 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-/**
- *
- * @author David https://www.youtube.com/davidpachecojimenez
- */
+
 public class Limpiar_txt {
 
     public void limpiar_texto(JPanel panel) {

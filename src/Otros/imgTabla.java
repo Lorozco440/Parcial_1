@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Otros;
 
 import java.awt.Component;
@@ -12,10 +8,7 @@ import javax.swing.JTable;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableCellRenderer;
 
-/**
- *
- * @author https://www.youtube.com/davidpachecojimenez
- */
+
 public class imgTabla extends DefaultTableCellRenderer {
 
     @Override

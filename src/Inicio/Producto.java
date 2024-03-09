@@ -1,29 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Inicio;
 
-/**
- *
- * @author David https://www.youtube.com/davidpachecojimenez
- */
-public class Producto {
+import java.io.Serializable;
+
+public class Producto implements Serializable{
 
     private int codigo;
     private String nombre;
     private double precio;
     private Object descripcion;
+    private byte [] foto;
 
     public Producto() {
     }
 
-    public Producto(int codigo, String nombre, double precio, Object descripcion) {
+    public Producto(int codigo, String nombre, double precio, Object descripcion, byte[]foto) {
         this.codigo = codigo;
         this.nombre = nombre;
         this.precio = precio;
         this.descripcion = descripcion;
+        this.foto = foto;
     }
 
     /**
@@ -84,6 +80,20 @@ public class Producto {
 
     public String toString() {
         return this.nombre;
+    }
+
+    /**
+     * @return the foto
+     */
+    public byte[] getFoto() {
+        return foto;
+    }
+
+    /**
+     * @param foto the foto to set
+     */
+    public void setFoto(byte[] foto) {
+        this.foto = foto;
     }
 
 }

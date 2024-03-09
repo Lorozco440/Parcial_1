@@ -1,17 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Inicio;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- *
- * @author David https://www.youtube.com/davidpachecojimenez
- */
-public class Proceso {
+
+public class Proceso implements Serializable{
 
     private ArrayList<Object> a = new ArrayList<Object>();
 

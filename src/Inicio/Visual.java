@@ -1,21 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package Inicio;
 
+import Buscar.Buscador;
 import Otros.ImagenJChooser;
 import Otros.Limpiar_txt;
 import Otros.imgTabla;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -23,10 +27,6 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
-/**
- *
- * @author https://www.youtube.com/davidpachecojimenez
- */
 public class Visual extends javax.swing.JFrame {
 
     /**
@@ -58,7 +58,7 @@ public class Visual extends javax.swing.JFrame {
     public void cargar_txt() {
         File ruta = new File(ruta_txt);
         try {
-
+          
             FileReader fi = new FileReader(ruta);
             BufferedReader bu = new BufferedReader(fi);
 
@@ -74,7 +74,7 @@ public class Visual extends javax.swing.JFrame {
             }
             bu.close();
         } catch (Exception ex) {
-            mensaje("Error al cargar archivo: " + ex.getMessage());
+            mensaje("Error al cargar archivo: Quizás esté vacío" + ex.getMessage());
             System.out.println(ex.getMessage());
         }
     }
@@ -82,15 +82,20 @@ public class Visual extends javax.swing.JFrame {
     public void grabar_txt() {
         FileWriter fw;
         PrintWriter pw;
+        
+        //FileOutputStream fos;
+        //ObjectOutputStream out;
         try {
+            
             fw = new FileWriter(ruta_txt);
             pw = new PrintWriter(fw);
-
-            for (int i = 0; i < proceso.cantidadRegistro(); i++) {
-                producto = proceso.obtenerRegistro(i);
+            
+            for(int i = 0; i< proceso.cantidadRegistro(); i++){
+               producto = proceso.obtenerRegistro(i);
                 pw.println(String.valueOf(producto.getCodigo() + ", " + producto.getNombre() + ", " + producto.getPrecio() + ", " + producto.getDescripcion()));
             }
             pw.close();
+         
 
         } catch (Exception ex) {
             mensaje("Error al grabar archivo: " + ex.getMessage());
@@ -109,7 +114,7 @@ public class Visual extends javax.swing.JFrame {
             } else if (leerDescripcion() == null) {
                 mensaje("Ingresar Descripcion");
             } else {
-                producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
+                producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion(), leerFoto(ruta));
                 if (proceso.buscaCodigo(producto.getCodigo()) != -1) {
                     mensaje("Este codigo ya existe");
                 } else {
@@ -137,7 +142,11 @@ public class Visual extends javax.swing.JFrame {
                 mensaje("Ingresar Descripcion");
             } else {
                 int codigo = proceso.buscaCodigo(leerCodigo());
-                producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion());
+                if (txtRuta.getText().equalsIgnoreCase("")) {
+                    producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion(), leerFoto2(codigo));
+                } else {
+                    producto = new Producto(leerCodigo(), leerNombre(), leerPrecio(), leerDescripcion(), leerFoto(ruta));
+                }
 
                 if (codigo == -1) {
                     proceso.agregarRegistro(producto);
@@ -163,7 +172,7 @@ public class Visual extends javax.swing.JFrame {
                 if (codigo == -1) {
                     mensaje("codigo no existe");
                 } else {
-                    int s = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar este producto", "Si/No", 0);
+                    int s = JOptionPane.showConfirmDialog(null, "Esta seguro de eliminar este registro", "Si/No", 0);
                     if (s == 0) {
                         proceso.eliminarRegistro(codigo);
 
@@ -187,11 +196,13 @@ public class Visual extends javax.swing.JFrame {
             }
         };
 
-        dt.addColumn("Codigo");
-        dt.addColumn("Nombre");
-        dt.addColumn("Precio");
-        dt.addColumn("Descripcion");
-
+        dt.addColumn("ID");
+        dt.addColumn("Nombres");
+        dt.addColumn("Sueldo");
+        dt.addColumn("Direccion");
+        dt.addColumn("Foto");
+        
+        
         tabla.setDefaultRenderer(Object.class, new imgTabla());
 
         Object fila[] = new Object[dt.getColumnCount()];
@@ -201,6 +212,17 @@ public class Visual extends javax.swing.JFrame {
             fila[1] = producto.getNombre();
             fila[2] = producto.getPrecio();
             fila[3] = producto.getDescripcion();
+            
+            try{
+                byte[] bi= producto.getFoto();
+                BufferedImage image = null;
+                InputStream in = new ByteArrayInputStream(bi);
+                image = ImageIO.read(in);
+                ImageIcon img = new ImageIcon(image.getScaledInstance(50, 60, 60));
+                fila[4] = new JLabel(img);
+           }catch(Exception ex){
+                fila[4] = "No hay Imagen";
+        }
             dt.addRow(fila);
         }
         tabla.setModel(dt);
@@ -245,7 +267,7 @@ public class Visual extends javax.swing.JFrame {
 
     public void open_file() {
         JFileChooser j = new JFileChooser();
-        //j.setCurrentDirectory(new File("ruta de archivo a recordar"));
+       
         FileNameExtensionFilter fil = new FileNameExtensionFilter("JPG, PNG & GIF", "jpg", "png", "gif");
         j.setFileFilter(fil);
         j.setCurrentDirectory(new File("Fotos"));
@@ -256,7 +278,9 @@ public class Visual extends javax.swing.JFrame {
         int el = j.showOpenDialog(this);
         if (el == JFileChooser.APPROVE_OPTION) {
             txtRuta.setText(j.getSelectedFile().getAbsolutePath());
-            lblFoto.setIcon(new ImageIcon(txtRuta.getText()));
+            Image img= new ImageIcon(txtRuta.getText()).getImage();
+            ImageIcon img2=new ImageIcon(img.getScaledInstance(90, 80, Image.SCALE_SMOOTH));   
+            lblFoto.setIcon(img2);
         }
     }
 
@@ -271,15 +295,15 @@ public class Visual extends javax.swing.JFrame {
         }
     }
 
-    /*
+    
     public byte[] leerFoto2(int codigo){
-            p = rp.obtenerRegistro(codigo);
+            producto = proceso.obtenerRegistro(codigo);
             try{
-               return p.getFoto();
+               return producto.getFoto();
             }catch(Exception ex){
                return null;
             }
-        }*/
+        }
     public void mensaje(String texto) {
         JOptionPane.showMessageDialog(null, texto);
     }
@@ -320,8 +344,9 @@ public class Visual extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Base de Datos con Bloc de Notas .txt");
+        setResizable(false);
 
-        panel.setBackground(new java.awt.Color(204, 204, 255));
+        panel.setBackground(new java.awt.Color(255, 255, 255));
 
         tabla.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -368,10 +393,10 @@ public class Visual extends javax.swing.JFrame {
         txtDescripcion.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
 
         jLabel4.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        jLabel4.setText("Descripcion:");
+        jLabel4.setText("Direccion");
 
         jLabel3.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        jLabel3.setText("Precio:");
+        jLabel3.setText("Sueldo");
 
         txtPrecio.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
 
@@ -385,10 +410,10 @@ public class Visual extends javax.swing.JFrame {
         txtCodigo.setFont(new java.awt.Font("SansSerif", 0, 14)); // NOI18N
 
         jLabel1.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        jLabel1.setText("Codigo:");
+        jLabel1.setText("ID:");
 
         jLabel2.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        jLabel2.setText("Nombre:");
+        jLabel2.setText("Nombres:");
 
         jLabel5.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
         jLabel5.setText("Foto:");
@@ -423,31 +448,31 @@ public class Visual extends javax.swing.JFrame {
                     .addGroup(panelLayout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(panelLayout.createSequentialGroup()
-                                .addComponent(jLabel4)
-                                .addGap(18, 18, 18)
-                                .addComponent(txtDescripcion))
+                            .addComponent(jScrollPane1)
                             .addGroup(panelLayout.createSequentialGroup()
                                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
                                     .addComponent(jLabel1)
-                                    .addComponent(jLabel3))
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel4))
                                 .addGap(47, 47, 47)
-                                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtNombre, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
-                                    .addComponent(txtPrecio))
-                                .addGap(20, 20, 20)
                                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtDescripcion)
                                     .addGroup(panelLayout.createSequentialGroup()
-                                        .addComponent(jLabel5)
-                                        .addGap(18, 18, 18)
-                                        .addComponent(jButton4))
-                                    .addComponent(txtRuta, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(lblFoto, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(8, 8, 8))))
+                                        .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(txtNombre, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
+                                            .addComponent(txtPrecio))
+                                        .addGap(20, 20, 20)
+                                        .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(panelLayout.createSequentialGroup()
+                                                .addComponent(jLabel5)
+                                                .addGap(18, 18, 18)
+                                                .addComponent(jButton4))
+                                            .addComponent(txtRuta, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lblFoto, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(8, 8, 8))))))
                     .addGroup(panelLayout.createSequentialGroup()
                         .addGap(167, 167, 167)
                         .addComponent(jButton1)
@@ -455,8 +480,9 @@ public class Visual extends javax.swing.JFrame {
                         .addComponent(jButton2)
                         .addGap(18, 18, 18)
                         .addComponent(jButton3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 105, Short.MAX_VALUE)
-                        .addComponent(jButton5)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 83, Short.MAX_VALUE)
+                        .addComponent(jButton5)
+                        .addGap(45, 45, 45)))
                 .addContainerGap())
         );
         panelLayout.setVerticalGroup(
@@ -479,25 +505,26 @@ public class Visual extends javax.swing.JFrame {
                         .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
                             .addComponent(txtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(lblFoto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblFoto, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtDescripcion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(29, 29, 29)
-                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3)
-                    .addComponent(jButton5))
+                .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton5, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButton1)
+                        .addComponent(jButton2)
+                        .addComponent(jButton3)))
                 .addGap(30, 30, 30)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
         jTabbedPane1.addTab("Registro de Productos", panel);
 
-        jPanel1.setBackground(new java.awt.Color(204, 204, 255));
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
 
         grupobuscar.add(rbc);
         rbc.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
@@ -519,7 +546,7 @@ public class Visual extends javax.swing.JFrame {
 
         grupobuscar.add(rbp);
         rbp.setFont(new java.awt.Font("SansSerif", 1, 14)); // NOI18N
-        rbp.setText("Filtrar por Precio");
+        rbp.setText("Filtrar por Sueldo");
         rbp.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rbpActionPerformed(evt);
@@ -568,7 +595,7 @@ public class Visual extends javax.swing.JFrame {
                                 .addGap(32, 32, 32)
                                 .addComponent(rbp))
                             .addComponent(txtbuscar))
-                        .addGap(0, 33, Short.MAX_VALUE)))
+                        .addGap(0, 54, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(272, 272, 272)
@@ -598,7 +625,7 @@ public class Visual extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
+            .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -665,9 +692,20 @@ public class Visual extends javax.swing.JFrame {
     }//GEN-LAST:event_txtNombreActionPerformed
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        
+        Buscador buscar = new Buscador();
+        if(rbc.isSelected()){
+            int codigo = Integer.parseInt(txtbuscar.getText().trim());
+            buscar.buscar_codigo(tablabuscar, producto, proceso, codigo);
     }//GEN-LAST:event_jButton6ActionPerformed
-
+        else if(rbn.isSelected()){
+        String nombre = txtbuscar.getText().trim();
+        buscar.buscar_nombre(tablabuscar, producto, proceso, nombre);
+        }
+        else if(rbp.isSelected()){
+        double precio = Double.parseDouble(txtbuscar.getText().trim());
+        buscar.buscar_precio(tablabuscar, producto, proceso, precio);
+        }
+    }
     private void rbcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbcActionPerformed
         txtbuscar.setText("");
     }//GEN-LAST:event_rbcActionPerformed
